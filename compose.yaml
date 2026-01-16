@@ -2,7 +2,7 @@ services:
   api:
     image: hyvor/relay:latest
     container_name: hyvor-relay-api
-    command: ["relay", "api"] # Fixes the "api: not found" error
+    command: ["relay", "api"]
     restart: always
     environment:
       - APP_ENV=prod
@@ -19,13 +19,14 @@ services:
       - "traefik.http.routers.hyvor-relay.entrypoints=https"
       - "traefik.http.routers.hyvor-relay.tls=true"
       - "traefik.http.services.hyvor-relay.loadbalancer.server.port=80"
+      - "traefik.docker.network=hyvor-network" # Explicitly tells the proxy which network to use
     networks:
       - hyvor-network
 
   worker:
     image: hyvor/relay:latest
     container_name: hyvor-relay-worker
-    command: ["relay", "worker"] # Fixes the "worker: not found" error
+    command: ["relay", "worker"]
     restart: always
     environment:
       - APP_ENV=prod
