@@ -1,9 +1,8 @@
 services:
-  # The main API and Frontend service
   api:
     image: hyvor/relay:latest
     container_name: hyvor-relay-api
-    command: api
+    command: ["relay", "api"] # Fixes the "api: not found" error
     restart: always
     environment:
       - APP_ENV=prod
@@ -23,11 +22,10 @@ services:
     networks:
       - hyvor-network
 
-  # The Go-based worker for sending emails
   worker:
     image: hyvor/relay:latest
     container_name: hyvor-relay-worker
-    command: worker
+    command: ["relay", "worker"] # Fixes the "worker: not found" error
     restart: always
     environment:
       - APP_ENV=prod
@@ -38,7 +36,6 @@ services:
     networks:
       - hyvor-network
 
-  # Your SMTP simulator for testing
   simulator:
     image: hyvor/smtp-simulator:latest
     container_name: hyvor-relay-simulator
