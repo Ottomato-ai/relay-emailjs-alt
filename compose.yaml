@@ -1,28 +1,39 @@
 services:
+  db:
+    image: postgres:17
+    container_name: hyvor-relay-db
+    restart: always
+    environment:
+      - POSTGRES_DB=relay
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - hyvor-network
+
   api:
     build: .
     container_name: hyvor-relay-api
     restart: always
     command: ["sh", "/app/run"]
-    # VERIFIED FIX: Explicitly expose port 80 to the Coolify network
-    expose:
-      - "80"
-    healthcheck:
-      disable: true
+    ports:
+      - "80:80"
     environment:
       - APP_ENV=prod
-      - 'APP_SECRET=${APP_SECRET}'
-      - 'DATABASE_URL=${DATABASE_URL}'
-      - 'WEB_URL=${WEB_URL}'
-      - 'INSTANCE_DOMAIN=${INSTANCE_DOMAIN}'
-      - 'OIDC_ISSUER_URL=${OIDC_ISSUER_URL}'
-      - 'OIDC_CLIENT_ID=${OIDC_CLIENT_ID}'
-      - 'OIDC_CLIENT_SECRET=${OIDC_CLIENT_SECRET}'
-      - 'SERVER_NAME=:80'
-      - 'GO_SYMFONY_URL=http://127.0.0.1:80'
+      - APP_SECRET=${APP_SECRET}
+      - DATABASE_URL=postgresql://postgres:${DB_PASSWORD}@db:5432/relay
+      - WEB_URL=${WEB_URL}
+      - INSTANCE_DOMAIN=${INSTANCE_DOMAIN}
+      - OIDC_ISSUER_URL=${OIDC_ISSUER_URL}
+      - OIDC_CLIENT_ID=${OIDC_CLIENT_ID}
+      - OIDC_CLIENT_SECRET=${OIDC_CLIENT_SECRET}
+      - SERVER_NAME=:80
+      - GO_SYMFONY_URL=http://127.0.0.1:80
+    depends_on:
+      - db
     networks:
       - hyvor-network
-      - coolify
 
   worker:
     build: .
@@ -32,11 +43,13 @@ services:
     restart: always
     environment:
       - APP_ENV=prod
-      - 'APP_SECRET=${APP_SECRET}'
-      - 'DATABASE_URL=${DATABASE_URL}'
-      - 'WEB_URL=${WEB_URL}'
-      - 'INSTANCE_DOMAIN=${INSTANCE_DOMAIN}'
-      - 'GO_SYMFONY_URL=http://hyvor-relay-api:80'
+      - APP_SECRET=${APP_SECRET}
+      - DATABASE_URL=postgresql://postgres:${DB_PASSWORD}@db:5432/relay
+      - WEB_URL=${WEB_URL}
+      - INSTANCE_DOMAIN=${INSTANCE_DOMAIN}
+      - GO_SYMFONY_URL=http://hyvor-relay-api:80
+    depends_on:
+      - db
     networks:
       - hyvor-network
 
@@ -49,8 +62,8 @@ services:
     networks:
       - hyvor-network
 
+volumes:
+  postgres_data:
+
 networks:
   hyvor-network:
-    external: true
-  coolify:
-    external: true
