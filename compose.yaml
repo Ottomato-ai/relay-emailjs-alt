@@ -3,9 +3,9 @@ services:
     build: .
     container_name: hyvor-relay-api
     restart: always
-    # FIX 1: Run the script verified in your logs (fixes 'relay not found')
+    # FIX 1: Run the startup script (prevents 'relay not found' crash)
     command: ["sh", "/app/run"]
-    # FIX 2: Disable healthchecks so Traefik allows traffic [Coolify Docs: Health Checks]
+    # FIX 2: Explicitly disable healthchecks so Traefik allows traffic immediately
     healthcheck:
       disable: true
     environment:
@@ -17,9 +17,9 @@ services:
       - 'OIDC_ISSUER_URL=${OIDC_ISSUER_URL}'
       - 'OIDC_CLIENT_ID=${OIDC_CLIENT_ID}'
       - 'OIDC_CLIENT_SECRET=${OIDC_CLIENT_SECRET}'
-      # FIX 3: Force FrankenPHP to HTTP/80 [GitHub: FrankenPHP #718]
+      # FIX 3: Force FrankenPHP to listen on HTTP Port 80
       - 'SERVER_NAME=:80'
-      # FIX 4: Connect internal services via container name
+      # FIX 4: Internal API communication
       - 'GO_SYMFONY_URL=http://127.0.0.1:80'
     networks:
       - hyvor-network
@@ -28,6 +28,7 @@ services:
   worker:
     build: .
     container_name: hyvor-relay-worker
+    # FIX 5: Point to the correct binary
     command:
       - /app/worker
     restart: always
