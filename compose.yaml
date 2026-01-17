@@ -1,6 +1,6 @@
 services:
   api:
-    image: hyvor/relay:latest
+    build: .
     container_name: hyvor-relay-api
     command: ["relay", "api"]
     restart: always
@@ -14,11 +14,11 @@ services:
       - OIDC_CLIENT_ID=${OIDC_CLIENT_ID}
       - OIDC_CLIENT_SECRET=${OIDC_CLIENT_SECRET}
     networks:
-      - hyvor-network   # To talk to your Database
-      - coolify         # To talk to the Internet (Traefik Proxy)
+      - hyvor-network
+      - coolify
 
   worker:
-    image: hyvor/relay:latest
+    build: .
     container_name: hyvor-relay-worker
     command: ["relay", "worker"]
     restart: always
