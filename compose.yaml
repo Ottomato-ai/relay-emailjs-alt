@@ -12,7 +12,9 @@ services:
       - 'OIDC_ISSUER_URL=${OIDC_ISSUER_URL}'
       - 'OIDC_CLIENT_ID=${OIDC_CLIENT_ID}'
       - 'OIDC_CLIENT_SECRET=${OIDC_CLIENT_SECRET}'
-      # CRITICAL FIX: Tells the internal Go binary where to find the PHP API
+      # CRITICAL FIX 1: Forces FrankenPHP to listen on HTTP Port 80 (Fixes 502 Error)
+      - 'SERVER_NAME=:80'
+      # CRITICAL FIX 2: Tells the internal Go binary where to find the API (Fixes Restart Loop)
       - 'GO_SYMFONY_URL=http://hyvor-relay-api:80'
     networks:
       - hyvor-network
@@ -30,7 +32,7 @@ services:
       - 'DATABASE_URL=${DATABASE_URL}'
       - 'WEB_URL=${WEB_URL}'
       - 'INSTANCE_DOMAIN=${INSTANCE_DOMAIN}'
-      # CRITICAL FIX: Tells the Worker where to find the API
+      # CRITICAL FIX 2: Tells the Worker where to find the API
       - 'GO_SYMFONY_URL=http://hyvor-relay-api:80'
     networks:
       - hyvor-network
