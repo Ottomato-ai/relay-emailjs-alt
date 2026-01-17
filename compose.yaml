@@ -2,7 +2,9 @@ services:
   api:
     build: .
     container_name: hyvor-relay-api
-    command: ["relay", "api"]
+    # REMOVED: command: ["relay", "api"]
+    # REASON: The Dockerfile already defines the correct startup script (/app/run).
+    # We must let the container use its default entrypoint.
     restart: always
     environment:
       - APP_ENV=prod
@@ -20,7 +22,8 @@ services:
   worker:
     build: .
     container_name: hyvor-relay-worker
-    command: ["relay", "worker"]
+    # UPDATED: Point directly to the binary compiled by your Dockerfile
+    command: ["/app/worker"]
     restart: always
     environment:
       - APP_ENV=prod
