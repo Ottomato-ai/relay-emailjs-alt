@@ -2,19 +2,18 @@ services:
   api:
     build: .
     container_name: hyvor-relay-api
-    # REMOVED: command: ["relay", "api"]
-    # REASON: The Dockerfile already defines the correct startup script (/app/run).
-    # We must let the container use its default entrypoint.
     restart: always
     environment:
       - APP_ENV=prod
-      - APP_SECRET=${APP_SECRET}
-      - DATABASE_URL=${DATABASE_URL}
-      - WEB_URL=${WEB_URL}
-      - INSTANCE_DOMAIN=${INSTANCE_DOMAIN}
-      - OIDC_ISSUER_URL=${OIDC_ISSUER_URL}
-      - OIDC_CLIENT_ID=${OIDC_CLIENT_ID}
-      - OIDC_CLIENT_SECRET=${OIDC_CLIENT_SECRET}
+      - 'APP_SECRET=${APP_SECRET}'
+      - 'DATABASE_URL=${DATABASE_URL}'
+      - 'WEB_URL=${WEB_URL}'
+      - 'INSTANCE_DOMAIN=${INSTANCE_DOMAIN}'
+      - 'OIDC_ISSUER_URL=${OIDC_ISSUER_URL}'
+      - 'OIDC_CLIENT_ID=${OIDC_CLIENT_ID}'
+      - 'OIDC_CLIENT_SECRET=${OIDC_CLIENT_SECRET}'
+      # CRITICAL FIX: Tells the internal Go binary where to find the PHP API
+      - 'GO_SYMFONY_URL=http://hyvor-relay-api:80'
     networks:
       - hyvor-network
       - coolify
@@ -22,20 +21,22 @@ services:
   worker:
     build: .
     container_name: hyvor-relay-worker
-    # UPDATED: Point directly to the binary compiled by your Dockerfile
-    command: ["/app/worker"]
+    command:
+      - /app/worker
     restart: always
     environment:
       - APP_ENV=prod
-      - APP_SECRET=${APP_SECRET}
-      - DATABASE_URL=${DATABASE_URL}
-      - WEB_URL=${WEB_URL}
-      - INSTANCE_DOMAIN=${INSTANCE_DOMAIN}
+      - 'APP_SECRET=${APP_SECRET}'
+      - 'DATABASE_URL=${DATABASE_URL}'
+      - 'WEB_URL=${WEB_URL}'
+      - 'INSTANCE_DOMAIN=${INSTANCE_DOMAIN}'
+      # CRITICAL FIX: Tells the Worker where to find the API
+      - 'GO_SYMFONY_URL=http://hyvor-relay-api:80'
     networks:
       - hyvor-network
 
   simulator:
-    image: hyvor/smtp-simulator:latest
+    image: 'hyvor/smtp-simulator:latest'
     container_name: hyvor-relay-simulator
     restart: unless-stopped
     environment:
