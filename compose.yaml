@@ -3,11 +3,11 @@ services:
     image: hyvor/relay:latest
     container_name: hyvor-relay-api
     expose:
-      - "80"
-      - "443"
+      - 80
+      - 443
     labels:
       caddy: relay.apps.ottomato.ai
-      caddy.reverse_proxy: "{{upstreams 80}}"
+      caddy.reverse_proxy: {{upstreams 80}}
     environment:
       - APP_ENV=${APP_ENV}
       - APP_SECRET=${APP_SECRET}
@@ -31,15 +31,17 @@ services:
     image: postgres:17-alpine
     container_name: hyvor-relay-db
     environment:
+      - POSTGRES_USER=relay
       - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=relay
     restart: unless-stopped
     volumes:
       - relay-db:/var/lib/postgresql/data
     networks:
       - coolify
-volumes:
-  relay-data:
-  relay-db:
 networks:
   coolify:
     external: true
+volumes:
+  relay-data:
+  relay-db:
