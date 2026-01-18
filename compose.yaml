@@ -1,6 +1,7 @@
 services:
   hyvor-relay-api:
     image: ghcr.io/hyvor/relay:latest
+    container_name: hyvor-relay-api
     restart: unless-stopped
     expose:
       - "80"
@@ -13,22 +14,27 @@ services:
     environment:
       - APP_ENV=${APP_ENV}
       - APP_SECRET=${APP_SECRET}
-      - DATABASE_URL=${DATABASE_URL}
-      - SERVER_HOSTNAME=${SERVER_HOSTNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - INSTANCE_DOMAIN=${INSTANCE_DOMAIN}
+      - OIDC_CLIENT_ID=${OIDC_CLIENT_ID}
+      - OIDC_CLIENT_SECRET=${OIDC_CLIENT_SECRET}
+      - OIDC_ISSUER_URL=${OIDC_ISSUER_URL}
+      - WEB_URL=${WEB_URL}
+      - SERVICE_URL_API=${SERVICE_URL_API}
+      - SERVICE_FQDN_API=${SERVICE_FQDN_API}
     volumes:
       - relay-data:/data
     depends_on:
       - hyvor-relay-db
 
   hyvor-relay-db:
-    image: postgres:16-alpine
+    image: postgres:17-alpine
+    container_name: hyvor-relay-db
     restart: unless-stopped
     networks:
       - coolify
     environment:
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
     volumes:
       - relay-db:/var/lib/postgresql/data
 
