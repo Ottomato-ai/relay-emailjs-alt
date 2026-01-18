@@ -1,78 +1,41 @@
 services:
-  db:
-    image: postgres:17
-    container_name: hyvor-relay-db
-    restart: always
-    environment:
-      - POSTGRES_DB=relay
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - hyvor-network
-
-  api:
-    build: .
-    container_name: hyvor-relay-api
-    restart: always
-    command: ["sh", "/app/run"]
+  hyvor-relay-api:
+    image: ghcr.io/hyvor/relay:latest
+    restart: unless-stopped
     expose:
       - "80"
+      - "443"
+    networks:
+      - coolify
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.relay.rule=Host(`relay.apps.ottomato.ai`)"
-      - "traefik.http.routers.relay.entrypoints=web"
-      - "traefik.http.services.relay.loadbalancer.server.port=80"
-      - "traefik.docker.network=traefik-proxy"
+      caddy: relay.apps.ottomato.ai
+      caddy.reverse_proxy: "{{upstreams 80}}"
     environment:
-      - APP_ENV=prod
+      - APP_ENV=${APP_ENV}
       - APP_SECRET=${APP_SECRET}
-      - DATABASE_URL=postgresql://postgres:${DB_PASSWORD}@db:5432/relay
-      - WEB_URL=${WEB_URL}
-      - INSTANCE_DOMAIN=${INSTANCE_DOMAIN}
-      - OIDC_ISSUER_URL=${OIDC_ISSUER_URL}
-      - OIDC_CLIENT_ID=${OIDC_CLIENT_ID}
-      - OIDC_CLIENT_SECRET=${OIDC_CLIENT_SECRET}
-      - SERVER_NAME=:80
-      - GO_SYMFONY_URL=http://127.0.0.1:80
+      - DATABASE_URL=${DATABASE_URL}
+      - SERVER_HOSTNAME=${SERVER_HOSTNAME}
+    volumes:
+      - relay-data:/data
     depends_on:
-      - db
-    networks:
-      - hyvor-network
-      - traefik-proxy
+      - hyvor-relay-db
 
-  worker:
-    build: .
-    container_name: hyvor-relay-worker
-    command:
-      - /app/worker
-    restart: always
-    environment:
-      - APP_ENV=prod
-      - APP_SECRET=${APP_SECRET}
-      - DATABASE_URL=postgresql://postgres:${DB_PASSWORD}@db:5432/relay
-      - WEB_URL=${WEB_URL}
-      - INSTANCE_DOMAIN=${INSTANCE_DOMAIN}
-      - GO_SYMFONY_URL=http://hyvor-relay-api:80
-    depends_on:
-      - db
-    networks:
-      - hyvor-network
-
-  simulator:
-    image: 'hyvor/smtp-simulator:latest'
-    container_name: hyvor-relay-simulator
+  hyvor-relay-db:
+    image: postgres:16-alpine
     restart: unless-stopped
-    environment:
-      - DOMAIN=simulator.net
     networks:
-      - hyvor-network
+      - coolify
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - relay-db:/var/lib/postgresql/data
 
 volumes:
-  postgres_data:
+  relay-data:
+  relay-db:
 
 networks:
-  hyvor-network:
-  traefik-proxy:
+  coolify:
     external: true
