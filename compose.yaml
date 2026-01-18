@@ -6,7 +6,7 @@ services:
       - 80
     labels:
       caddy: relay.apps.ottomato.ai
-      caddy.reverse_proxy: "{{upstreams 80}}"
+      caddy.reverse_proxy: {{upstreams 80}}
     environment:
       - APP_ENV=${APP_ENV}
       - APP_SECRET=${APP_SECRET}
@@ -22,11 +22,10 @@ services:
     volumes:
       - relay-data:/data
     depends_on:
-      hyvor-relay-db:
-        condition: service_healthy
+      - hyvor-relay-db
     networks:
       - coolify
-
+      
   hyvor-relay-db:
     image: postgres:17-alpine
     container_name: hyvor-relay-db
@@ -34,22 +33,24 @@ services:
       - POSTGRES_USER=relay
       - POSTGRES_PASSWORD=${DB_PASSWORD}
       - POSTGRES_DB=relay
-    restart: unless-stopped
     volumes:
       - relay-db:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U relay -d relay"]
+      test:
+        - CMD-SHELL
+        - pg_isready -U relay -d relay
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 10s
+    restart: unless-stopped
     networks:
       - coolify
-
+      
 networks:
   coolify:
     external: true
-
+    
 volumes:
-  relay-data:
+  relay-data: 
   relay-db:
