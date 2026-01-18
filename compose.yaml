@@ -12,6 +12,7 @@ services:
       - APP_ENV=${APP_ENV}
       - APP_SECRET=${APP_SECRET}
       - DB_PASSWORD=${DB_PASSWORD}
+      - DATABASE_URL=${DATABASE_URL}
       - INSTANCE_DOMAIN=${INSTANCE_DOMAIN}
       - OIDC_CLIENT_ID=${OIDC_CLIENT_ID}
       - OIDC_CLIENT_SECRET=${OIDC_CLIENT_SECRET}
@@ -31,15 +32,8 @@ services:
     container_name: hyvor-relay-db
     environment:
       - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - DATABASE_URL=${DATABASE_URL}
     restart: unless-stopped
     volumes:
       - relay-db:/var/lib/postgresql/data
     networks:
       - coolify
-networks:
-  coolify:
-    external: true
-volumes:
-  relay-data: 
-  relay-db: 
