@@ -1,6 +1,6 @@
 services:
   hyvor-relay-api:
-    image: ghcr.io/hyvor/relay:latest
+    image: hyvor/relay:latest
     container_name: hyvor-relay-api
     restart: unless-stopped
     expose:
