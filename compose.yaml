@@ -17,13 +17,14 @@ services:
     container_name: hyvor-relay-api
     restart: always
     command: ["sh", "/app/run"]
-    ports:
-      - "80:80"
+    expose:
+      - "80"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.relay.rule=Host(`relay.apps.ottomato.ai`)"
       - "traefik.http.routers.relay.entrypoints=web"
       - "traefik.http.services.relay.loadbalancer.server.port=80"
+      - "traefik.docker.network=traefik-proxy"
     environment:
       - APP_ENV=prod
       - APP_SECRET=${APP_SECRET}
@@ -39,6 +40,7 @@ services:
       - db
     networks:
       - hyvor-network
+      - traefik-proxy
 
   worker:
     build: .
@@ -72,3 +74,5 @@ volumes:
 
 networks:
   hyvor-network:
+  traefik-proxy:
+    external: true
