@@ -37,3 +37,9 @@ services:
       - relay-db:/var/lib/postgresql/data
     networks:
       - coolify
+networks:
+  coolify:
+    external: true
+volumes:
+  relay-data:
+  relay-db:
